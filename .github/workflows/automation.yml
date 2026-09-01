@@ -20,10 +20,10 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v8
         with:
-          commit-message: "chore: update file [skip ci]"
+          commit-message: "chore: update file"
           branch: "automation/update-file"
           delete-branch: true
-          title: "chore: update file"
+          title: "chore: update file [skip ci]"
           body: "Automated update of a.txt"
 
       - name: Auto-merge
