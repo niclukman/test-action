@@ -50,6 +50,9 @@ jobs:
           echo "Build passed or skipped"
 
   update:
+    permissions:
+      contents: write
+      pull-requests: write
     needs: test
     if: github.event_name == 'push'
     uses: ./.github/workflows/automation.yml
