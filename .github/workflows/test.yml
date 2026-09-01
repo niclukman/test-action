@@ -9,6 +9,7 @@ on:
 
 jobs:
   check:
+    if: ${{ !contains(github.event.pull_request.title, '[skip ci]') }}
     runs-on: ubuntu-latest
     outputs:
       run: ${{ steps.check.outputs.run }}
@@ -26,7 +27,7 @@ jobs:
 
   test:
     needs: check
-    if: needs.check.outputs.run == 'true'
+    if: ${{ !contains(github.event.pull_request.title, '[skip ci]') && needs.check.outputs.run == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
