@@ -1,0 +1,56 @@
+name: test
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check
+        id: check
+        run: |
+          if [ -f "a.txt" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  test:
+    needs: check
+    if: needs.check.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Print file
+        run: |
+          cat a.txt
+
+  status:
+    needs: [check, test]
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify build
+        run: |
+          if [ "${{ needs.test.result }}" == "failure" ] || \
+             [ "${{ needs.test.result }}" == "cancelled" ]; then
+            echo "Build failed"
+            exit 1
+          fi
+          echo "Build passed or skipped"
+
+  update:
+    needs: test
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/automation.yml
+    secrets: inherit
