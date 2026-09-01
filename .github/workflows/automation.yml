@@ -1,0 +1,33 @@
+name: automation
+
+on:
+  workflow_call:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update file
+        run: |
+          echo "1" >> a.txt
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "chore: update file"
+          branch: "automation/update-file"
+          delete-branch: true
+          title: "chore: update file"
+          body: "Automated update of a.txt"
+
+      - name: Auto-merge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        run: gh pr merge --auto --squash "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
